@@ -12,14 +12,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM rhel7
+FROM centos:centos7
 
-RUN rpm -ivh http://dl.fedoraproject.org/pub/epel/7/x86_64/Packages/e/epel-release-7-11.noarch.rpm
-RUN yum install redis hostname -y ; yum clean all
+MAINTAINER chaizs@asiainfo.com
+
+RUN yum install wget -y && \
+	wget -r --no-parent -A epel-release-*.rpm https://dl.fedoraproject.org/pub/epel/7/x86_64/Packages/e/ && \
+	rpm -Uvh dl.fedoraproject.org/pub/epel/7/x86_64/Packages/e/epel-release-*.rpm && \
+	yum install redis -y && \
+	yum clean all && \
+	rm -rf /var/cache/yum && \
+	mkdir -p /redis-sentinel
+	#chmod -R 777 /redis-sentinel /redis-slave
 
 COPY redis-master.conf /redis-master/redis.conf
 COPY redis-slave.conf /redis-slave/redis.conf
-RUN mkdir -p /redis-sentinel ; chmod -R 777 /redis-sentinel /redis-slave
 COPY run.sh /run.sh
 
 CMD [ "/run.sh" ]
